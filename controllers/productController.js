@@ -11,7 +11,7 @@ const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
-    cb(new AppError("Not an image! Please upload only images", 404), false);
+    cb(new AppError("Not an image! Please upload only images", 400), false);
   }
 };
 
@@ -27,7 +27,9 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
 
   req.file.filename = `product-${req.params.id}-${Date.now()}-cover.jpeg`;
   await sharp(req.file.buffer)
-    .resize(1000, 1000)
+    .resize(1000, 1000, {
+      fit: "cover",
+    })
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
     .toFile(`public/img/products/${req.file.filename}`);
