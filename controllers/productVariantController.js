@@ -1,6 +1,7 @@
 const multer = require("multer");
 const sharp = require("sharp");
 const ProductVariant = require("../models/productVariantModel");
+const Cart = require("../models/cartModel");
 const catchAsync = require("../util/catchAsync");
 const AppError = require("../util/appError");
 const Product = require("../models/productModel");
@@ -25,7 +26,7 @@ exports.uploadProductImage = upload.single("image");
 exports.resizeProductImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  req.file.filename = `product-${req.params.id}-${Date.now()}-cover.jpeg`;
+  req.file.filename = `variant-${req.params.id}-${Date.now()}.jpeg`;
   await sharp(req.file.buffer)
     .resize(1000, 1000)
     .toFormat("jpeg")
@@ -79,17 +80,21 @@ exports.updateVariant = catchAsync(async (req, res, next) => {
 });
 exports.deleteVariant = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.productId);
+
   if (!product) {
     return next(new AppError("No product found with this ID", 404));
   }
-  const variant = await ProductVariant.findOneAndDelete({
+
+  const variant = await ProductVariant.findById({
     _id: req.params.id,
     product: req.params.productId,
   });
 
   if (!variant) {
-    return next(new AppError("No variant found with this ID", 404));
+    return next(new AppError("Product variant not found", 404));
   }
+  variant.isActive = false;
+  await variant.save();
   res.status(204).json({
     status: "success",
     data: null,

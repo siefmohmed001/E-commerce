@@ -35,6 +35,10 @@ const productVariantSchema = new mongoose.Schema({
     ref: "Product",
     required: [true, "A product varaint must have a product ID"],
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const ProductVariant = mongoose.model("ProductVariant", productVariantSchema);

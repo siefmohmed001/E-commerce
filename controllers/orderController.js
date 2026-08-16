@@ -6,7 +6,9 @@ const ProductVariant = require("../models/productVariantModel");
 const factoryHandler = require("./factoryHandler");
 
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const cart = await Cart.findOne({ user: req.user.id });
+  const cart = await Cart.findOne({
+    user: req.user.id,
+  });
 
   if (!cart) {
     return next(new AppError("There is no cart on this user", 404));
@@ -15,10 +17,12 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   if (cart.item.length === 0) {
     return next(new AppError("Cart is Empty", 400));
   }
+
   const variantsId = cart.item.map((el) => el.productVariant);
 
   const variants = await ProductVariant.find({
     _id: { $in: variantsId },
+    isActive: true,
   });
 
   const orderItems = cart.item.map((cartItem) => {
@@ -27,7 +31,10 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     );
 
     if (!variant) {
-      throw new AppError("Product Variant not found", 404);
+      throw new AppError(
+        "One of the product variants in your cart is no longer available",
+        400,
+      );
     }
 
     if (cartItem.quantity > variant.quantity) {
@@ -64,9 +71,12 @@ exports.createOrder = catchAsync(async (req, res, next) => {
       _id: cart._id,
     },
     {
-      $set: { item: [] },
+      $set: {
+        item: [],
+      },
     },
   );
+
   res.status(201).json({
     status: "success",
     data: {

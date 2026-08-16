@@ -19,6 +19,9 @@ exports.getAll = (Model) =>
     let filter = {};
     if (req.params.categoryId) filter = { category: req.params.categoryId };
     if (req.params.productId) filter = { product: req.params.productId };
+    if (req.params.collectionId) {
+      filter = { collection: req.params.collectionId };
+    }
     const featuers = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()

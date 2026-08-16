@@ -4,6 +4,7 @@ const Product = require("../models/productModel");
 const catchAsync = require("../util/catchAsync");
 const AppError = require("../util/appError");
 const factoryHandler = require("./factoryHandler");
+const ProductVariant = require("../models/productVariantModel");
 
 const multerStorage = multer.memoryStorage();
 
@@ -33,11 +34,30 @@ exports.resizeProductImage = catchAsync(async (req, res, next) => {
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
     .toFile(`public/img/products/${req.file.filename}`);
-  req.body.image = `img/products/${req.file.filename}`;
+  req.body.coverImage = `img/products/${req.file.filename}`;
   next();
 });
 exports.createProduct = factoryHandler.createOne(Product);
 exports.getAllProducts = factoryHandler.getAll(Product);
 exports.getProduct = factoryHandler.getOne(Product, "productVariant");
 exports.updateProduct = factoryHandler.updateOne(Product);
-exports.deleteProduct = factoryHandler.deleteOne(Product);
+exports.deleteProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new AppError("Product not found", 404));
+  }
+  const variants = await ProductVariant.find({
+    product: req.params.id,
+  });
+
+  console.log("PRODUCT:", req.params.id);
+  console.log("VARIANTS:", variants);
+  await ProductVariant.deleteMany({
+    product: req.params.id,
+  });
+  await Product.findByIdAndDelete(req.params.id);
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});

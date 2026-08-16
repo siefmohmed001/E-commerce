@@ -5,7 +5,6 @@ const categorySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
     },
     collection: {
       type: mongoose.Schema.ObjectId,
@@ -18,6 +17,8 @@ const categorySchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+
+categorySchema.index({ collection: 1, category: 1 }, { unique: true });
 
 categorySchema.virtual("products", {
   ref: "Product",

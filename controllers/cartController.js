@@ -13,6 +13,11 @@ exports.addItem = catchAsync(async (req, res, next) => {
     return next(new AppError("Product Variant not found", 404));
   }
 
+  if (!variant.isActive) {
+    return next(
+      new AppError("This product variant is no longer available", 400),
+    );
+  }
   const quantityToAdd = req.body.quantity || 1;
 
   if (quantityToAdd <= 0) {
