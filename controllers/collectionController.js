@@ -1,4 +1,5 @@
 const Collection = require("../models/collectionModel");
+const Category = require("../models/categoryModel");
 const catchAsync = require("../util/catchAsync");
 const AppError = require("../util/appError");
 const factoryHandler = require("./factoryHandler");

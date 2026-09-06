@@ -41,6 +41,7 @@ app.use(xss());
 app.use("/api/v1/collections", collectionRoute);
 app.use("/api/v1/products", productRoute);
 // app.use("/ap1/v1/variants", productVariantRouter);
+app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/orders", orderRoute);

@@ -50,8 +50,6 @@ exports.deleteProduct = catchAsync(async (req, res, next) => {
     product: req.params.id,
   });
 
-  console.log("PRODUCT:", req.params.id);
-  console.log("VARIANTS:", variants);
   await ProductVariant.deleteMany({
     product: req.params.id,
   });

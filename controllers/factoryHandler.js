@@ -16,6 +16,7 @@ exports.createOne = (Model) =>
 
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
+    // This filter is for nested routes
     let filter = {};
     if (req.params.categoryId) filter = { category: req.params.categoryId };
     if (req.params.productId) filter = { product: req.params.productId };
@@ -29,9 +30,24 @@ exports.getAll = (Model) =>
       .paginate();
 
     const doc = await featuers.query;
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 20;
+
+    const totalDocuments = await Model.countDocuments({
+      ...filter,
+      ...featuers.filterObj,
+    });
+
+    const numPages = Math.ceil(totalDocuments / limit);
     res.status(200).json({
       status: "success",
       results: doc.length,
+      pagination: {
+        page,
+        limit,
+        totalDocuments,
+        numPages,
+      },
       data: {
         data: doc,
       },
